@@ -1,0 +1,155 @@
+-- 1. Crear y usar la base de datos
+CREATE DATABASE IF NOT EXISTS novagridx;
+USE novagridx;
+
+-- ==========================================
+-- CREACIÓN DE TABLAS (ESTRUCTURA)
+-- ==========================================
+
+-- 2. Tabla de Métodos de Pago
+CREATE TABLE IF NOT EXISTS payment_methods (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    status ENUM('Active', 'Inactive') DEFAULT 'Active'
+);
+
+-- 3. Tabla de Categorías
+CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    types VARCHAR(100) NOT NULL,
+    quantity INT DEFAULT 0,
+    hierarchy VARCHAR(50)
+);
+
+-- 4. Tabla de Usuarios
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    `password` VARCHAR(255) NOT NULL,
+    user_id VARCHAR(10) NOT NULL UNIQUE,
+    payment_method_id INT,
+    create_date DATE NOT NULL,
+    up_date DATE,
+    role ENUM('Client', 'Artist', 'Both') NOT NULL,
+    raiting DECIMAL(2,1) CHECK (raiting >= 0.0 AND raiting <= 5.0),
+    
+    CONSTRAINT fk_users_payment FOREIGN KEY (payment_method_id) 
+        REFERENCES payment_methods(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- 5. Tabla de Publicaciones (Posts)
+CREATE TABLE IF NOT EXISTS posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    category_id INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    available BOOLEAN DEFAULT TRUE,
+    user_id INT NOT NULL,
+    image_url VARCHAR(255),
+    `date` DATE NOT NULL,
+    type ENUM('Request', 'Art Piece', 'Commission Slot') NOT NULL,
+    
+    CONSTRAINT fk_posts_category FOREIGN KEY (category_id) 
+        REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_posts_user FOREIGN KEY (user_id) 
+        REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 6. Tabla de Ventas (Sales)
+CREATE TABLE IF NOT EXISTS sales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product VARCHAR(150) NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    confirmed ENUM('YES', 'PENDING', 'NO') DEFAULT 'PENDING',
+    payment_method_id INT NOT NULL,
+    
+    CONSTRAINT fk_sales_post FOREIGN KEY (post_id) 
+        REFERENCES posts(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_sales_user FOREIGN KEY (user_id) 
+        REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_sales_payment FOREIGN KEY (payment_method_id) 
+        REFERENCES payment_methods(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- 7. Tabla de Envíos (Shipping)
+CREATE TABLE IF NOT EXISTS shipping (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sale_id INT NOT NULL UNIQUE,
+    type VARCHAR(50) NOT NULL,
+    download_link VARCHAR(255),
+    artist_confirmed BOOLEAN DEFAULT FALSE,
+    client_confirmed BOOLEAN DEFAULT FALSE,
+    status ENUM('Delivered', 'Pending', 'Cancelled') DEFAULT 'Pending',
+    `date` DATE NOT NULL,
+    
+    CONSTRAINT fk_shipping_sale FOREIGN KEY (sale_id) 
+        REFERENCES sales(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ==========================================
+-- INSERCIÓN DE DATOS (REGISTROS)
+-- ==========================================
+
+-- Insertar Métodos de Pago
+INSERT INTO payment_methods (id, name, status) VALUES
+(1, 'Card - VISA (BBVA)', 'Active'),
+(2, 'Card - MASTERCARD (BANORTE)', 'Active'),
+(3, 'Bank Transfer', 'Active'),
+(4, 'Card - VISA (SANTANDER)', 'Active'),
+(5, 'Card - VISA (BBVA)', 'Active'),
+(6, 'Card - MASTERCARD (CITIBANAMEX)', 'Active'),
+(7, 'Bank Transfer', 'Active');
+
+-- Insertar Categorías
+INSERT INTO categories (id, types, quantity, hierarchy) VALUES
+(1, '2D Illustration', 45, 'Category'),
+(2, 'Character Design', 30, 'Category'),
+(3, 'Business', 12, 'Category'),
+(4, '3D Modeling', 18, 'Category'),
+(5, 'Pixer Art', 25, 'Subcategory'),
+(6, 'Logos', 15, 'Subcategory'),
+(7, 'Storyboard', 22, 'Category');
+
+-- Insertar Usuarios
+INSERT INTO users (id, name, last_name, email, `password`, user_id, payment_method_id, create_date, up_date, role, raiting) VALUES
+(1, 'Juan', 'Hernandez', 'juan@gmail.com', '12345678', 'USR001', 1, '2026-11-23', '2026-11-30', 'Client', 4.5),
+(2, 'Phil', 'Bourassa', 'bourassa@gmail.com', '75453160', 'USR002', 2, '2026-11-25', '2026-12-02', 'Artist', 4.8),
+(3, 'Ed', 'Benes', 'edbenes@gmail.com', 'ab&tQk89', 'USR003', 3, '2026-11-30', '2026-12-07', 'Both', 4.7),
+(4, 'Jojo', 'Johnson', 'jojo@hotmail.com', 'nov84per', 'USR004', 4, '2026-12-07', '2026-12-14', 'Client', 4.0),
+(5, 'Dan', 'Mora', 'danmora@yahoo.com', '12waf654', 'USR005', 5, '2026-12-13', '2026-12-20', 'Artist', 4.5),
+(6, 'Andy', 'Murray', 'andy@outlook.com', 'ffdt7543', 'USR006', 6, '2026-12-16', '2026-12-23', 'Artist', 5.0),
+(7, 'Kath', 'Lobo', 'kathlobo@gmail.com', 't6tv87xd', 'USR007', 7, '2026-12-19', '2026-12-26', 'Both', 4.3);
+
+-- Insertar Publicaciones (Posts)
+INSERT INTO posts (id, title, category_id, price, available, user_id, image_url, `date`, type) VALUES
+(1, 'I need illustrator', 3, 150.00, TRUE, 1, '-', '2026-12-01', 'Request'),
+(2, 'Batman Sketch', 1, 350.00, TRUE, 2, 'img_batman_02.png', '2026-12-02', 'Art Piece'),
+(3, 'Huntress BoP', 2, 500.00, FALSE, 3, 'bertinelli.png', '2026-12-03', 'Commission Slot'),
+(4, 'Goku', 1, 200.00, FALSE, 4, '-', '2026-12-08', 'Request'),
+(5, 'Cover Art', 1, 600.00, TRUE, 5, 'worldfinest.png', '2026-12-14', 'Art Piece'),
+(6, '3D Concept Art', 4, 400.00, TRUE, 6, 'img_andy_06.png', '2026-12-17', 'Art Piece'),
+(7, 'Donna Troy', 2, 120.00, TRUE, 7, 'donna.png', '2026-12-20', 'Commission Slot');
+
+-- Insertar Ventas (Sales)
+INSERT INTO sales (id, product, quantity, post_id, user_id, confirmed, payment_method_id) VALUES
+(1, 'Banner PYME', 150.00, 1, 1, 'YES', 1),
+(2, 'Batman Sketch', 350.00, 2, 2, 'YES', 2),
+(3, 'Huntress BoP', 500.00, 3, 3, 'YES', 3),
+(4, 'Goku', 200.00, 4, 4, 'YES', 4),
+(5, 'Cover Art', 600.00, 5, 5, 'PENDING', 5),
+(6, '3D Concept Art', 400.00, 6, 6, 'PENDING', 6),
+(7, 'Donna Troy', 120.00, 7, 7, 'YES', 7);
+
+-- Insertar Envíos (Shipping)
+INSERT INTO shipping (id, sale_id, type, download_link, artist_confirmed, client_confirmed, status, `date`) VALUES
+(1, 1, 'Email', 'novagridx.com/2242.zip', TRUE, TRUE, 'Delivered', '2026-12-05'),
+(2, 2, 'Physical Parcel', '-', TRUE, TRUE, 'Delivered', '2026-12-06'),
+(3, 3, 'Drive', 'drive.google.com/huntress', TRUE, TRUE, 'Delivered', '2026-12-07'),
+(4, 4, 'Message', 'novagridx.com/chat/goku.png', TRUE, TRUE, 'Delivered', '2026-12-10'),
+(5, 5, 'Drive', 'drive.google.com/cover', TRUE, FALSE, 'Pending', '2026-12-15'),
+(6, 6, 'Email', 'novagridx.com/dl/3dmodel.rar', FALSE, FALSE, 'Pending', '2026-12-18'),
+(7, 7, 'Message', 'novagridx.com/chat/donna.png', TRUE, TRUE, 'Delivered', '2026-12-21');
