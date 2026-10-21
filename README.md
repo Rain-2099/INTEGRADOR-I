@@ -1,9 +1,9 @@
 # INTEGRADOR-I
-Repositorio en donde dejamos la documentacion del integrador
-Tenemos dieferentes brach para contenido especifico:
-   BackEnd:
-           Codigos de funcionalidad de la aplicacion.
-   FrontEnd:
-           Diseño de la aplicacion.
-   DataBase:
-           La base de datos completa.
+
+Repositorio principal en donde se aloja la documentación y el código del proyecto Integrador.
+
+El proyecto está organizado en diferentes ramas (*branches*) para separar el contenido específico:
+
+* **BackEnd:** Códigos de funcionalidad y lógica de la aplicación.
+* **FrontEnd:** Diseño e interfaz gráfica de la aplicación.
+* **DataBase:** Estructura, esquemas y la base de datos completa.
