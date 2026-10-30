@@ -153,3 +153,15 @@ INSERT INTO shipping (id, sale_id, type, download_link, artist_confirmed, client
 (5, 5, 'Drive', 'drive.google.com/cover', TRUE, FALSE, 'Pending', '2026-12-15'),
 (6, 6, 'Email', 'novagridx.com/dl/3dmodel.rar', FALSE, FALSE, 'Pending', '2026-12-18'),
 (7, 7, 'Message', 'novagridx.com/chat/donna.png', TRUE, TRUE, 'Delivered', '2026-12-21');
+
+ALTER TABLE users MODIFY last_name VARCHAR(50) NULL;
+
+ALTER TABLE posts ADD COLUMN description VARCHAR(500) NULL;
+
+UPDATE posts SET description = 'Necesito un artista para contratar que pueda ilustrarme un banner para una pequeña y mediana empresa (PYME).' WHERE id = 1;
+UPDATE posts SET description = 'Boceto original de Batman, el cruzado enmascarado' WHERE id = 2;
+UPDATE posts SET description = 'Slot disponible para comisión detallada de Huntress en su etapa de las Birds of Prey de los 2000.' WHERE id = 3;
+UPDATE posts SET description = 'Quiero un dibujo de Goku en su fase Super Saiyajin 5 todo ESENCIAL digno del General Tablos.' WHERE id = 4;
+UPDATE posts SET description = 'Portada del comic de Worlds Finest en su origen secreto!' WHERE id = 5;
+UPDATE posts SET description = 'Arte conceptual de Lancelot y Steve Palchuk para Magos: Relatos de Arcadia' WHERE id = 6;
+UPDATE posts SET description = 'Dibujo detallado de Donna Troy, la Wonder Girl original. Ideal para coleccionistas.' WHERE id = 7;
